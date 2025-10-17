@@ -1,0 +1,77 @@
+@startuml Library Example
+
+title Library Event Modelling
+!include styling.puml
+
+'left to right direction
+'top to bottom direction
+'skinparam linetype ortho
+'skinparam linetype polyline
+
+' --- Actors & External Systems ---
+actor "Library\nClerk" as clerk
+actor "Customer" as customer
+
+' --- SLICE 1: Register a new Book ---
+EventModel_Slice("Register Book", registerBook) {
+  Trigger(regBookForm, "Register Book UI")
+  Command(regBookCmd, "Register Book")
+  Event(bookRegistered, "Book Registered")
+}
+
+' --- SLICE 2: Publish a Book ---
+EventModel_Slice("Publish Book", publishBook) {
+  Read_Model(allBooksView, "All Books")
+  Trigger(publishBookBtn, "Publish Button")
+  Command(publishBookCmd, "Publish Book")
+  Event(bookPublished, "Book Published")
+}
+
+' --- SLICE 3: Customer Reserves a Book ---
+EventModel_Slice("Reserve Book", reserveBook) {
+  Read_Model(booksToBorrow, "Books To Borrow")
+  Trigger(reserveBookBtn, "Reserve Button")
+  Command(reserveBookCmd, "Reserve Book")
+  Event(bookReserved, "Book Reserved")
+}
+
+' --- SLICE 4: Pick up a reserved Book ---
+EventModel_Slice("Pickup Book", pickupBook) {
+  Read_Model(reservedBooks, "Reserved Books")
+  Automation(scanner, "Manual Pickup")
+  Command(pickupBookCmd, "Pickup Book")
+  Event(bookBorrowed, "Book Borrowed")
+}
+
+' --- Define Relationships (All at the end for stability) ---
+
+' Flow within Slice 1
+clerk -left-> regBookForm
+regBookForm --> regBookCmd
+regBookCmd --> bookRegistered
+
+' Flow within Slice 2
+' The Read Model is populated by an Event from the previous slice
+bookRegistered --> allBooksView
+allBooksView --> publishBookBtn
+clerk --> publishBookBtn
+publishBookBtn --> publishBookCmd
+publishBookCmd --> bookPublished
+
+' Flow within Slice 3
+' This Read Model needs info from two previous events
+bookRegistered --> booksToBorrow
+bookPublished --> booksToBorrow
+booksToBorrow --> reserveBookBtn
+customer -left-> reserveBookBtn
+reserveBookBtn --> reserveBookCmd
+reserveBookCmd --> bookReserved
+
+' Flow within Slice 4
+' This is an Automation Pattern, triggered by a Read Model
+bookReserved --> reservedBooks
+reservedBooks --> scanner
+scanner --> pickupBookCmd
+pickupBookCmd --> bookBorrowed
+
+@enduml
