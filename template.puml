@@ -1,77 +1,86 @@
-@startuml Library Example
+' EventModeling-PlantUML
+' Version 6.0 - Standard Syntax Styles
 
-title Library Event Modelling
-!include styling.puml
+' ##################################
+' ##          STYLING             ##
+' ##################################
 
-'left to right direction
-'top to bottom direction
-'skinparam linetype ortho
-'skinparam linetype polyline
+skinparam defaultTextAlignment center
+skinparam wrapWidth 200
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam defaultFontName "Segoe UI", "Helvetica", "Arial"
+skinparam defaultFontSize 14
 
-' --- Actors & External Systems ---
-actor "Library\nClerk" as clerk
-actor "Customer" as customer
+' ADD THIS: Hides the automatic green 'C' icon
+skinparam classStereotypeIcon false
 
-' --- SLICE 1: Register a new Book ---
-EventModel_Slice("Register Book", registerBook) {
-  Trigger(regBookForm, "Register Book UI")
-  Command(regBookCmd, "Register Book")
-  Event(bookRegistered, "Book Registered")
+' Style for the slice containers
+skinparam package {
+  BorderColor #AAAAAA
+  BorderStyle solid
+  FontColor #555555
+  StereotypeFontSize 0
+  TitleAlignment left
 }
 
-' --- SLICE 2: Publish a Book ---
-EventModel_Slice("Publish Book", publishBook) {
-  Read_Model(allBooksView, "All Books")
-  Trigger(publishBookBtn, "Publish Button")
-  Command(publishBookCmd, "Publish Book")
-  Event(bookPublished, "Book Published")
+<style>
+spot{
+  spotClass {
+    BackgroundColor: LightGrey;
+    FontColor: Black;
+    LineColor: Black;
+  }
 }
+</style>
 
-' --- SLICE 3: Customer Reserves a Book ---
-EventModel_Slice("Reserve Book", reserveBook) {
-  Read_Model(booksToBorrow, "Books To Borrow")
-  Trigger(reserveBookBtn, "Reserve Button")
-  Command(reserveBookCmd, "Reserve Book")
-  Event(bookReserved, "Book Reserved")
+' === Pre-defined colors ===
+!$EM_COMMAND_BG = "#BDE0FE"
+!$EM_COMMAND_BORDER = "#4361EE"
+!$EM_EVENT_BG = "#FFE2B8"
+!$EM_EVENT_BORDER = "#FC9E4F"
+!$EM_READMODEL_BG = "#D9ED92"
+!$EM_READMODEL_BORDER = "#76C893"
+!$EM_SYSTEM_BG = "#EAEAEA"
+!$EM_SYSTEM_BORDER = "#BDBDBD"
+!$EM_POLICY_BG = "#E0BBEA"
+!$EM_POLICY_BORDER = "#957DAD"
+!$EM_TRIGGER_BG = "#FFFFFF"
+!$EM_TRIGGER_BORDER = "#666666"
+!$EM_AUTOMATION_BG = "#FFFFFF"
+!$EM_AUTOMATION_BORDER = "#666666"
+
+
+' === All elements are styled using 'class' or 'agent' ===
+skinparam class<<Command>> {
+  BackgroundColor $EM_COMMAND_BG
+  BorderColor $EM_COMMAND_BORDER
 }
-
-' --- SLICE 4: Pick up a reserved Book ---
-EventModel_Slice("Pickup Book", pickupBook) {
-  Read_Model(reservedBooks, "Reserved Books")
-  Automation(scanner, "Manual Pickup")
-  Command(pickupBookCmd, "Pickup Book")
-  Event(bookBorrowed, "Book Borrowed")
+skinparam class<<Event>> {
+  BackgroundColor $EM_EVENT_BG
+  BorderColor $EM_EVENT_BORDER
 }
-
-' --- Define Relationships (All at the end for stability) ---
-
-' Flow within Slice 1
-clerk -left-> regBookForm
-regBookForm --> regBookCmd
-regBookCmd --> bookRegistered
-
-' Flow within Slice 2
-' The Read Model is populated by an Event from the previous slice
-bookRegistered --> allBooksView
-allBooksView --> publishBookBtn
-clerk --> publishBookBtn
-publishBookBtn --> publishBookCmd
-publishBookCmd --> bookPublished
-
-' Flow within Slice 3
-' This Read Model needs info from two previous events
-bookRegistered --> booksToBorrow
-bookPublished --> booksToBorrow
-booksToBorrow --> reserveBookBtn
-customer -left-> reserveBookBtn
-reserveBookBtn --> reserveBookCmd
-reserveBookCmd --> bookReserved
-
-' Flow within Slice 4
-' This is an Automation Pattern, triggered by a Read Model
-bookReserved --> reservedBooks
-reservedBooks --> scanner
-scanner --> pickupBookCmd
-pickupBookCmd --> bookBorrowed
-
-@enduml
+skinparam class<<"Read Model">> {
+  BackgroundColor $EM_READMODEL_BG
+  BorderColor $EM_READMODEL_BORDER
+}
+skinparam class<<"External System">> {
+  BackgroundColor $EM_SYSTEM_BG
+  BorderColor $EM_SYSTEM_BORDER
+}
+skinparam agent<<Policy>> {
+  BackgroundColor $EM_POLICY_BG
+  BorderColor $EM_POLICY_BORDER
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+}
+skinparam class<<Trigger>> {
+  BackgroundColor $EM_TRIGGER_BG
+  BorderColor $EM_TRIGGER_BORDER
+}
+skinparam class<<Automation>> {
+  BackgroundColor $EM_AUTOMATION_BG
+  BorderColor $EM_AUTOMATION_BORDER
+}
