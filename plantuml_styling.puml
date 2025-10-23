@@ -1,5 +1,5 @@
 ' EventModeling-PlantUML
-' Version 4.1 - Final Syntax Correction
+' Version 6.0 - Standard Syntax Styles
 
 ' ##################################
 ' ##          STYLING             ##
@@ -12,6 +12,9 @@ skinparam roundcorner 5
 skinparam defaultFontName "Segoe UI", "Helvetica", "Arial"
 skinparam defaultFontSize 14
 
+' ADD THIS: Hides the automatic green 'C' icon
+skinparam classStereotypeIcon false
+
 ' Style for the slice containers
 skinparam package {
   BorderColor #AAAAAA
@@ -21,6 +24,17 @@ skinparam package {
   TitleAlignment left
 }
 
+<style>
+spot{
+  spotClass {
+    BackgroundColor: LightGrey;
+    FontColor: Black;
+    LineColor: Black;
+  }
+}
+</style>
+
+' === Pre-defined colors ===
 !$EM_COMMAND_BG = "#BDE0FE"
 !$EM_COMMAND_BORDER = "#4361EE"
 !$EM_EVENT_BG = "#FFE2B8"
@@ -33,68 +47,40 @@ skinparam package {
 !$EM_POLICY_BORDER = "#957DAD"
 !$EM_TRIGGER_BG = "#FFFFFF"
 !$EM_TRIGGER_BORDER = "#666666"
+!$EM_AUTOMATION_BG = "#FFFFFF"
+!$EM_AUTOMATION_BORDER = "#666666"
 
-' CORRECTED: All skinparam blocks are now in the required multi-line format.
-skinparam rectangle<<Command>> {
+
+' === All elements are styled using 'class' or 'agent' ===
+skinparam class<<Command>> {
   BackgroundColor $EM_COMMAND_BG
   BorderColor $EM_COMMAND_BORDER
-  FontColor $EM_COMMAND_BORDER
 }
-skinparam rectangle<<Event>> {
+skinparam class<<Event>> {
   BackgroundColor $EM_EVENT_BG
   BorderColor $EM_EVENT_BORDER
-  FontColor $EM_EVENT_BORDER
 }
-skinparam rectangle<<"Read Model">> {
+skinparam class<<"Read Model">> {
   BackgroundColor $EM_READMODEL_BG
   BorderColor $EM_READMODEL_BORDER
-  FontColor $EM_READMODEL_BORDER
 }
-skinparam rectangle<<"External System">> {
+skinparam class<<"External System">> {
   BackgroundColor $EM_SYSTEM_BG
   BorderColor $EM_SYSTEM_BORDER
-  FontColor #555555
 }
 skinparam agent<<Policy>> {
   BackgroundColor $EM_POLICY_BG
   BorderColor $EM_POLICY_BORDER
-  FontColor $EM_POLICY_BORDER
 }
 skinparam actor {
   BackgroundColor #FFFFFF
   BorderColor #666666
 }
-skinparam rectangle<<Trigger>> {
+skinparam class<<Trigger>> {
   BackgroundColor $EM_TRIGGER_BG
   BorderColor $EM_TRIGGER_BORDER
-  FontColor #333333
 }
-skinparam queue<<Automation>> {
-    BackgroundColor #FFFFFF
-    BorderColor #666666
+skinparam class<<Automation>> {
+  BackgroundColor $EM_AUTOMATION_BG
+  BorderColor $EM_AUTOMATION_BORDER
 }
-
-' ##################################
-' ##          ELEMENTS            ##
-' ##################################
-
-!define Command(alias, label) rectangle "label" <<Command>> as alias
-!define Event(alias, label) rectangle "label" <<Event>> as alias
-!define System(alias, label) rectangle "label" <<External System>> as alias
-!define Read_Model(alias, label) rectangle "label" <<"Read Model">> as alias
-!define Trigger(alias, label) rectangle "label" <<Trigger>> as alias
-!define Automation(alias, label) queue "==label" as alias <<$gear>> <<Automation>>
-
-' ##################################
-' ##          SLICES              ##
-' ##################################
-
-!define EventModel_Slice(name, alias) package "slice: name" as alias
-
-' ##################################
-' ##       RELATIONSHIPS          ##
-' ##################################
-!definelong Rel(e_source, e_target, e_label, e_direction)
-e_source e_direction e_target : e_label
-!enddefinelong
-!define Flow(from, to, label="") Rel(from, to, label, "-->")
