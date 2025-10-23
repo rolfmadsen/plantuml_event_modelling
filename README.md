@@ -37,7 +37,7 @@ The `styling.puml` library file defines styles and color variables for the essen
 
 1.  **Clone or Download the Repository**: Get the `styling.puml` file and the example `.puml` files.
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone https://github.com/rolfmadsen/plantuml_event_modelling.git
     ```
 2.  **Include the Library**: At the top of your PlantUML diagram file, add the following line to include the styles and color variables:
     ```plantuml
