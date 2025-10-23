@@ -1,6 +1,6 @@
 # PlantUML for Event Modeling
 
-This repository provides a simple yet powerful PlantUML library to create diagrams using the **Event Modeling** methodology. The goal is to enable teams to quickly and consistently visualize system behavior as a chronological storyboard, focusing on the flow of information over time.
+This repository provides a simple yet powerful PlantUML **style library** to create diagrams using the **Event Modeling** methodology. The goal is to enable teams to quickly and consistently visualize system behavior as a chronological storyboard, focusing on the flow of information over time.
 
 This library is inspired by the work of [Adam Dymitruk](https://eventmodeling.org/) and the clear, step-by-step examples from [Martin Dilger](https://www.linkedin.com/in/martindilger/).
 
@@ -8,18 +8,30 @@ This library is inspired by the work of [Adam Dymitruk](https://eventmodeling.or
 
 Event Modeling is a method of describing a system by illustrating the flow of information through it. It visualizes the entire system on a single diagram, making it a powerful tool for collaboration between business stakeholders and technical teams.
 
-This PlantUML library provides macros to easily create the core building blocks and patterns of an Event Model.
+This PlantUML library provides styles and pre-defined color variables to easily create the core building blocks of an Event Model using standard PlantUML syntax.
+
+![Event Model Example](template.png)
 
 ## Core Building Blocks
 
-The `styling.puml` library file defines macros for the essential elements of an Event Model, each with its standard color and purpose:
+The `styling.puml` library file defines styles and color variables for the essential elements of an Event Model. You create elements using standard `class` or `agent` syntax and apply the correct stereotype.
 
-  * **Trigger** (White): Represents a UI or API endpoint where a user or system initiates an action.
+  * **Slice** (Gray Package): A container for a chronological slice.
+      * **Syntax**: `package "Slice Name" { ... }`
+  * **Trigger** (White ⚪): Represents a UI, API, or user action.
+      * **Syntax**: `class "Registration Form" <<Trigger>>`
   * **Command** (Blue 🔵): An intention to change the state of the system.
-  * **Event** (Orange 🟠): A factual record of something that has happened and has been saved. This is the source of truth.
-  * **Read Model** (Green 🟢): A projection or query of one or more events, tailored for a specific view or need.
-  * **Automation** (Gear Icon ⚙️): A system-driven, automated process, often triggered by a Read Model.
-  * **EventModel\_Slice** (Package): A container that represents a single, vertical slice of functionality in the chronological storyboard.
+      * **Syntax**: `class "Register User" <<Command>>`
+  * **Event** (Orange 🟠): A factual record of something that has happened. This is the source of truth.
+      * **Syntax**: `class "User Registered" <<Event>>`
+  * **Read Model** (Green 🟢): A projection or query tailored for a specific view.
+      * **Syntax**: ` class "User Profile" <<"Read Model">>  ` (Note the quotes)
+  * **Automation** (White ⚪): A system-driven, automated process.
+      * **Syntax**: `class "Send Email" <<Automation>>`
+  * **Policy** (Purple 🟣): A business rule or policy that processes events.
+      * **Syntax**: `agent "Email Policy" <<Policy>>`
+  * **External System** (Gray 🌫️): A third-party system or integration.
+      * **Syntax**: ` class "Payment Gateway" <<"External System">>  ` (Note the quotes)
 
 ## How to Use
 
@@ -27,7 +39,7 @@ The `styling.puml` library file defines macros for the essential elements of an 
     ```bash
     git clone https://github.com/your-username/your-repo-name.git
     ```
-2.  **Include the Library**: At the top of your PlantUML diagram file, add the following line to include the styles and macros:
+2.  **Include the Library**: At the top of your PlantUML diagram file, add the following line to include the styles and color variables:
     ```plantuml
     !include styling.puml
     ```
@@ -35,119 +47,108 @@ The `styling.puml` library file defines macros for the essential elements of an 
 
 ## Creating Your Own Event Models
 
-The library makes it simple to create new diagrams by using the provided macros. The key is to structure your model as a series of chronological slices.
+This library uses standard PlantUML syntax, enhanced with two key concepts: **Stereotypes** for box colors and **Spot Stereotypes** for the corner icons.
 
-### 1\. Adding Elements
+### 1\. Adding Elements and Slices
 
-Use the macros to define the building blocks of your system. Each macro follows the format `ElementType(alias, "Display Label")`.
+Define elements using `class` and group them into `package` slices. The styles are applied automatically based on the stereotype.
 
 ```plantuml
-' Define elements for a user registration flow
-Trigger(regForm, "Registration UI")
-Command(regCmd, "Register User")
-Event(userRegistered, "User Registered")
-Read_Model(profileView, "User Profile View")
+@startuml
+!include styling.puml
+
+' A slice is just a standard package
+package "Slice 1: Register User" {
+  ' The stereotype <<Command>> automatically colors the box blue
+  class RegisterUser <<Command>> {
+    username: string
+  }
+
+  ' The stereotype <<Event>> automatically colors the box orange
+  class UserRegistered <<Event>> {
+    userId: UUID
+  }
+}
+@enduml
 ```
 
-### 2\. Structuring with Slices
+### 2\. Using Spot Stereotypes (The "Circled Letter" Icon)
 
-Group related elements into a vertical `EventModel_Slice`. This represents one step in your system's story.
+To get the circled 'E' for Events or 'C' for Commands, you must add them manually. This library is designed for this method.
+
+1.  **Hide the Default Icon**: The `styling.puml` file already includes `skinparam classStereotypeIcon false` to hide PlantUML's default (and unchangeable) 'C' icon.
+2.  **Add a Manual Spot**: Add `<<(Letter)>>` to your class definition.
+3.  **Color the Spot**: Add the color *inline* using one of the pre-defined variables from `styling.puml` (e.g., `$EM_EVENT_BORDER`).
+
+This gives you full control over the icon's letter and color, while keeping the color definition centralized in the style file.
 
 ```plantuml
-EventModel_Slice("Register User", registerSlice) {
-  Trigger(regForm, "Registration UI")
-  Command(regCmd, "Register User")
-  Event(userRegistered, "User Registered")
+package "Slice 2: With Spots" {
+  ' Syntax: <<(Letter, $ColorVariable), Stereotype>>
+  class Handling2 <<(C, $EM_COMMAND_BORDER), Command>> {
+    name
+  }
+
+  class Hændelse2 <<(E, $EM_EVENT_BORDER), Event>>{
+    event_id
+  }
 }
 ```
 
 ### 3\. Defining Information Flow
 
-Use the `Flow()` macro to draw relationships between elements. This macro handles optional labels correctly.
+Use standard PlantUML arrows (`->`, `-->`, etc.) to show the flow of information between elements.
 
 ```plantuml
-' A user interacts with a form, which issues a command
-Flow(user, regForm)
-Flow(regForm, regCmd, "Submits")
-
-' A command is handled by a system and produces an event
-Flow(regCmd, authSystem, "Handled by")
-Flow(authSystem, userRegistered, "Produces")
+' A command is handled and produces an event
+Handling2 -right-> Hændelse2 : udløser hændelsen
 ```
 
-## Complete Example: Library System
+## Complete Example
 
-This example models the process of registering and borrowing a book in a library. It demonstrates the use of all core concepts, including command patterns, view patterns, and automation.
+This example demonstrates the full syntax for creating a multi-slice event model.
 
 ```plantuml
-@startuml Library Example
+@startuml Example Event Model
 !include styling.puml
 
-left to right direction
+skinparam packageStyle rectangle
 
-' --- Actors & External Systems ---
-actor "Library\nClerk" as clerk
-actor "Customer" as customer
-
-' --- SLICE 1: Register a new Book ---
-EventModel_Slice("Register Book", registerBook) {
-  Trigger(regBookForm, "Register Book UI")
-  Command(regBookCmd, "Register Book")
-  Event(bookRegistered, "Book Registered")
+package "Slice 1" {
+  class "Eksternt System" <<(E, $EM_SYSTEM_BORDER), "External System">> {
+    event_id : UUID
+  }
 }
 
-' --- SLICE 2: Publish a Book ---
-EventModel_Slice("Publish Book", publishBook) {
-  Read_Model(allBooksView, "All Books")
-  Trigger(publishBookBtn, "Publish Button")
-  Command(publishBookCmd, "Publish Book")
-  Event(bookPublished, "Book Published")
+package "Slice 2" {
+  "Eksternt System" -down-> Handling2 : publiser/abonnér
+  
+  ' Spot <<(C)>> is colored with the $EM_COMMAND_BORDER variable
+  class Handling2 <<(C, $EM_COMMAND_BORDER), Command>> {
+    name
+    person_id : UUID
+  }
+  
+  ' Spot <<(E)>> is colored with the $EM_EVENT_BORDER variable
+  class Hændelse2 <<(E, $EM_EVENT_BORDER), Event>>{
+    event_id : UUID
+  }
 }
 
-' --- SLICE 3: Customer Reserves a Book ---
-EventModel_Slice("Reserve Book", reserveBook) {
-  Read_Model(booksToBorrow, "Books To Borrow")
-  Trigger(reserveBookBtn, "Reserve Button")
-  Command(reserveBookCmd, "Reserve Book")
-  Event(bookReserved, "Book Reserved")
+package "Slice 3" {
+  Hændelse2 -down-> Handling3 : publiser/abonnér
+  Handling2 -right-> Hændelse2 : udløser hændelsen
+  
+  class Handling3 <<(C, $EM_COMMAND_BORDER), Command>> {
+    name
+    person_id : UUID
+  }
+  Handling3 -right-> Hændelse3 : udløser hændelsen
+  
+  class Hændelse3 <<(E, $EM_EVENT_BORDER), Event>>{
+    event_id : UUID
+  }
 }
-
-' --- SLICE 4: Pick up a reserved Book ---
-EventModel_Slice("Pickup Book", pickupBook) {
-  Read_Model(reservedBooks, "Reserved Books")
-  Automation(scanner, "Manual Pickup")
-  Command(pickupBookCmd, "Pickup Book")
-  Event(bookBorrowed, "Book Borrowed")
-}
-
-' --- Define Relationships (All at the end for stability) ---
-
-' Flow within Slice 1
-clerk --> regBookForm
-regBookForm --> regBookCmd
-regBookCmd --> bookRegistered
-
-' Flow within Slice 2
-bookRegistered --> allBooksView
-allBooksView --> publishBookBtn
-clerk --> publishBookBtn
-publishBookBtn --> publishBookCmd
-publishBookCmd --> bookPublished
-
-' Flow within Slice 3
-bookRegistered --> booksToBorrow
-bookPublished --> booksToBorrow
-booksToBorrow --> reserveBookBtn
-customer --> reserveBookBtn
-reserveBookBtn --> reserveBookCmd
-reserveBookCmd --> bookReserved
-
-' Flow within Slice 4
-bookReserved --> reservedBooks
-reservedBooks --> scanner
-scanner --> pickupBookCmd
-pickupBookCmd --> bookBorrowed
-
 @enduml
 ```
 
